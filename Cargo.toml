@@ -2,6 +2,12 @@
 name = "plunger"
 version = "0.1.0"
 edition = "2021"
+authors = ["DMP <david@masponte.com>"]
+readme = "README.md"
+repository = "https://github.com/davidmasp/plunger"
+
+[badges]
+maintenance = { status = "experimental" }
 
 [dependencies]
 clap = { version = "4.5.23", features = ["derive"] }

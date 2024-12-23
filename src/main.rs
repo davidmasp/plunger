@@ -12,7 +12,7 @@ use clap::Parser;
 
 /// Simple program to greet a person
 #[derive(Parser, Debug)]
-#[command(version, about, long_about = None)]
+#[command(version = "0.1.0", about = "A small program to quantify and clean workdirs from nextflow pipelines", long_about = None)]
 struct Args {
     /// Workdir to parse
     #[arg(short = 'w', long, default_value = "./work")]
