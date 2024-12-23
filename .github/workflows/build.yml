@@ -1,0 +1,22 @@
+name: Build
+
+permissions: {}
+
+on:
+    push:
+      tags:
+        - '*'
+
+env:
+  CARGO_INCREMENTAL: 0
+
+jobs:
+  build:
+    runs-on: self-hosted
+    steps:
+    - uses: actions/checkout@v4
+    - run: rustup update
+    - run: cargo build --release
+    - uses: actions/upload-artifact@v4
+      with:
+        path: target/release/plunger
