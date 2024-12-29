@@ -36,9 +36,9 @@ pub enum TaskType {
 
 #[derive(Debug)]
 pub struct Task {
-    pub name: String,
-    pub task_type: TaskType,
-    pub mini_path: String,
+    pub _name: String,
+    pub _task_type: TaskType,
+    pub _mini_path: String,
 }
 
 #[derive(Debug)]
@@ -79,16 +79,16 @@ impl Run {
 
             if let Some((cached_dir, cached_task_name)) = extract_regex_two(regex_task_cached, &line) {
                 tasks.push(Task {
-                    name: cached_task_name,
-                    task_type: TaskType::Cached,
-                    mini_path: cached_dir.clone(),
+                    _name: cached_task_name,
+                    _task_type: TaskType::Cached,
+                    _mini_path: cached_dir.clone(),
                 });
                 minipaths.push(cached_dir);
             } else if let Some((submitted_dir, submitted_task_name)) = extract_regex_two(regex_task_submitted, &line) {
                 tasks.push(Task {
-                    name: submitted_task_name,
-                    task_type: TaskType::Submitted,
-                    mini_path: submitted_dir.clone(),
+                    _name: submitted_task_name,
+                    _task_type: TaskType::Submitted,
+                    _mini_path: submitted_dir.clone(),
                 });
                 minipaths.push(submitted_dir);
             } else {} // do nothing
@@ -98,9 +98,6 @@ impl Run {
 
         match (code, wkdir) {
             (Some(cd), Some(wd)) => {
-                debug!("Code: {}", cd);
-                debug!("Workdir: {}", wd);
-                debug!("Tasks: {}", tasks.len());
                 return Ok(Run {
                     code: cd,
                     work_dir: std::path::PathBuf::from(wd),
@@ -128,6 +125,11 @@ pub fn workflow_run(params_path_log: &str, params_cached: &str, params_submitted
         &re_cached,
         &re_submitted,
     )?;
+
+    debug!("Code: {}", run_obj.code);
+    debug!("Workdir: {}", run_obj.work_dir.to_str().expect("weird error, workdir"));
+    debug!("Logpath: {}", run_obj.log_path.to_str().expect("weird error, logpath"));
+    debug!("Tasks: {}", run_obj.tasks.len());
 
     let mut purged_size = 0;
 
