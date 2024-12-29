@@ -7,12 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+
+## [0.2.0]
+
 ### Added
 
-* Adding a changelog
-* Adding run command (similar to nextflow clean)
+* Adding a changelog.
+* Adding run command (similar to nextflow clean).
 * refactoring of original task code.
 * Example pipeline now has an easy way to force/remove resume behaviour.
+* Removed warnings during compilation.
+* Added clippy suggestions.
 
 ### Changed
 

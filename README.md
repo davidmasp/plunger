@@ -1,11 +1,12 @@
 # 🪠 Plunger
 
+➡️ [Changelog](./CHANGELOG.md)
+
 [![experimental](http://badges.github.io/stability-badges/dist/experimental.svg)](http://github.com/badges/stability-badges)
 
-Plunger is a small rust tool to parse the workdir of a
-[nextflow](https://nextflow.io/) pipeline.
-It can measure and aggregate the used disk size per task
-and delete a specific one if requested. 
+Plunger is a small collection of tools to parse the workdir of a
+[nextflow](https://nextflow.io/) pipeline and perform some cleaning
+operations.
 
 ## Install
 
@@ -21,15 +22,25 @@ for pre-built (linux) binaries.
 
 ## Quickstart
 
-The following use case can be found when
-debugging or developing a nextflow pipeline.
-In this hypothetical case, the final step
-keeps failing. We update the script
-and before resuming, we clean the
-workdir for that specific task, while keeping
-the previous ones intact. This allows us to resume
-the execution of the bugging process without
-maintaing the files in the workdir.
+After installing, navigate to a nextflow run dir and run:
+
+```bash
+$ cd example_pipelinene
+$ nextflow run main.nf --seed 42
+[blah blah blah]
+$ plunger task
+B ➡️ 38.2kB
+C ➡️ 37.7kB
+A ➡️ 12.88GB
+```
+
+## Other use cases
+
+### Deleting files from a specific process
+
+This case can remove all folders from a single process in the workdir.
+This can be useful when developing pipelines when
+a specific process is modified many times and has heavy outputs.
 
 ```bash
 $ cd example_pipeline
@@ -47,11 +58,11 @@ executor >  local (8)
 $ du -sh work 
 4.1G    work
 
-$ plunger
+$ plunger task
 B ➡️ 12.7kB
 A ➡️ 4.29GB
 
-$ plunger -t A
+$ plunger task -t A
 A ➡️ 4.29GB
 B ➡️ 12.7kB
 
@@ -59,49 +70,45 @@ $ du -sh work
 96K     work
 ```
 
-If developing with "decoy files", this shouldn't be a
-major problem, however, sometimes pipelines only
-fail for some samples in a large list during "production"
-or even a single
-sample requires large files per process.
+### Measuring disk usage per process
 
-## Other use cases
+To just measure how much disk space each process is taking, run the same command
+without the --tasks argument. We can also use custom workdirs.
 
-### Measuring disk usage in custom workdirs
-
-To just count how much disk space each task is taking, run the same command
-without the --tasks argument.
+Although `--limit-lines` is also an argument, the default value should be enough. It might
+be needed in large SLURM configs or untested environments. 
 
 ```bash
-plunger --file .command.run --limit-lines 100 ./work
+plunger task --file .command.run --limit-lines 100 ./work
 ```
 
-### Purging a specific task from the workdir
+### Deleting all but one run
+
+This usecase is equivalent to `nextflow clean -but ...`. Essentially, deletes all
+folders that are not relevant for the "latest" run.
+
+Note that although plunger seems faster in this single run test it might lack
+internal functionality nextflow clean has (e.g. modifying the history file).
+I might try to implement a complete drop-in replacement in the future.
 
 ```bash
-plunger --tasks SUBSAMPLE:SEQTK_SUBSAMPLE --file .command.run --limit-lines 100 ./work
+$ nextflow run main.nf --seed 44 -resume
+$ nextflow run main.nf --seed 47 -resume
+$ nextflow run main.nf --seed 50 -resume
+Launching `main.nf` [modest_mestorf] ... blah ...
+$ du -sh .                              
+13G     .
+$ time nextflow clean -but modest_mestorf -f 
+... blah ...
+nextflow clean -but modest_mestorf -f  0.86s user 0.15s system 94% cpu 1.073 total
+# same as above
+$ plunger -v clean
+12:14:12 [INFO] Running clean with rundir: .nextflow.log
+12:14:12 [INFO] Would purge size: 8.59GB
+$ time plunger -v clean -f              
+12:15:36 [INFO] Running clean with rundir: .nextflow.log
+12:15:36 [INFO] Purged size: 8.59GB
+plunger -v clean -f  0.01s user 0.05s system 32% cpu 0.169 total
+$ du -sh .
+4.1G    .
 ```
-
-File, limit-lines and the workdir path have all sensible defaults so, most of the
-time, you should be able to just run plunger alone. See [quickstart](#quickstart)
-
-## Next steps
-
-I need to parse the log files to be able to prune specific runs.
-The use case here would be. For a pipeline A -> B -> C where
-you have been debugging the pipeline many times without cleaning.
-Thus, if the bug was on B, many B directories contain intermediate
-files that you will never rescue again because they are not
-resumable. However, you don't want to start a fresh run.
-
-If you simply delete task B, then you will loose the
-latest run which contains the correct, up-to-date data.
-
-In such escenario, it would be cool to run:
-
-```bash
-plunger --keep-run deadly_newton -f
-```
-
-This would remove all the work dir subdirectories that
-are not present in the `deadly_newton` run, aka the last one.
