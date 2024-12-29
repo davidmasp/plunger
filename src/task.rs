@@ -46,7 +46,7 @@ pub fn get_name_line(file_path: &std::path::Path, limit_lines: &usize, regex: &R
             },
         }
     }
-    return Err(PlungerTaskError::LineLimitReached);
+    Err(PlungerTaskError::LineLimitReached)
 }
 
 pub fn workflow_task(params_restring: &str, params_target_workdir: &str, params_target_filename:&str, params_limit_lines: usize, params_tasks_to_delete: Vec<String>) -> Result<(), PlungerTaskError> {

@@ -91,22 +91,22 @@ impl Run {
                     _mini_path: submitted_dir.clone(),
                 });
                 minipaths.push(submitted_dir);
-            } else {} // do nothing
+            } 
             
             line.clear();
         }
 
         match (code, wkdir) {
             (Some(cd), Some(wd)) => {
-                return Ok(Run {
+                Ok(Run {
                     code: cd,
                     work_dir: std::path::PathBuf::from(wd),
-                    log_path: log_path,
-                    tasks: tasks,
-                    minipaths: minipaths,
+                    log_path,
+                    tasks,
+                    minipaths,
                 })
             },
-            _ => return Err(PlungerRunError::MissingInfoInLog),
+            _ => Err(PlungerRunError::MissingInfoInLog),
         }
     }
 }
@@ -147,7 +147,7 @@ pub fn workflow_run(params_path_log: &str, params_cached: &str, params_submitted
             Ok(test) => test,
             Err(_) => continue,
         };
-        if dir_element.path() == &run_obj.work_dir {
+        if run_obj.work_dir  == dir_element.path() {
             debug!("Skipping workdir");
             continue;
         }
@@ -156,7 +156,7 @@ pub fn workflow_run(params_path_log: &str, params_cached: &str, params_submitted
         match (fname_option, dirname_option){
             (Some(fpath), Some(dir)) => {
 
-                if dir == &run_obj.work_dir {
+                if run_obj.work_dir == dir {
                     debug!("Skipping first level directories");
                     continue;
                 }

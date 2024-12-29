@@ -13,7 +13,6 @@ mod cli;
 use cli::{Cli, Commands};
 
 use log::info;
-use simplelog;
 use simplelog::{ConfigBuilder, Level, Color};
 
 fn main() {
@@ -67,7 +66,7 @@ fn main() {
                 Some(tasks) => tasks.clone(),
                 None => vec!["".to_string()], // is this dangerous? maybe a task name can be empty?
             };
-            let params_limit_lines: usize = limit_lines.clone();
+            let params_limit_lines: usize = *limit_lines;
 
             // internal params, task mode
             let params_target_filename = ".command.run";
